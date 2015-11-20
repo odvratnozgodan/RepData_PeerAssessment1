@@ -1,0 +1,52 @@
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
+
+
+## Loading and preprocessing the data
+```{r echo = TRUE}
+suppressPackageStartupMessages(library(dplyr))
+if(file.exists("activity.zip")){
+    unzip("activity.zip");
+    df = data.frame(read.csv("activity.csv"));
+}else{
+    temp <- tempfile("activity.zip");
+    download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip",destfile = "activity.zip", method = "curl");
+    unzip("activity.zip");
+    unlink(temp);
+    df = data.frame(read.csv("activity.csv"));
+}
+
+df = mutate(df, date = as.Date(date, format = '%Y-%m-%d'));
+head(df);
+
+```
+
+
+## What is mean total number of steps taken per day?
+```{r echo=TRUE}
+suppressPackageStartupMessages(library(ggplot2))
+
+steps_per_day = df %>% filter(complete.cases(steps)) %>% group_by(date) %>% summarise(steps=sum(steps));
+
+breaks <- pretty(range(steps_per_day$steps), n = nclass.FD(steps_per_day$steps), min.n = 1);
+bwidth <- breaks[2]-breaks[1];
+qplot(data=steps_per_day, steps, xlab="Steps per day", binwidth = bwidth);
+
+mean = steps_per_day %>% summarise(mean(steps));
+median = steps_per_day %>% summarise(median(steps));
+```
+
+
+## What is the average daily activity pattern?
+
+
+
+## Imputing missing values
+
+
+
+## Are there differences in activity patterns between weekdays and weekends?
