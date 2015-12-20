@@ -30,23 +30,88 @@ head(df);
 ```{r echo=TRUE}
 suppressPackageStartupMessages(library(ggplot2))
 
-steps_per_day = df %>% filter(complete.cases(steps)) %>% group_by(date) %>% summarise(steps=sum(steps));
+steps_per_day = df %>% filter(complete.cases(steps)) %>% group_by(date) %>% summarise(steps=sum(steps))
 
-breaks <- pretty(range(steps_per_day$steps), n = nclass.FD(steps_per_day$steps), min.n = 1);
-bwidth <- breaks[2]-breaks[1];
-qplot(data=steps_per_day, steps, xlab="Steps per day", binwidth = bwidth);
+breaks <- pretty(range(steps_per_day$steps), n = nclass.FD(steps_per_day$steps), min.n = 1)
+bwidth <- breaks[2]-breaks[1]
+qplot(data=steps_per_day, steps, xlab="Steps per day", binwidth = bwidth)
 
-mean = steps_per_day %>% summarise(mean(steps));
-median = steps_per_day %>% summarise(median(steps));
+mean = steps_per_day %>% summarise(mean(steps))
+median = steps_per_day %>% summarise(median(steps))
+mean
+median
 ```
 
 
 ## What is the average daily activity pattern?
+```{r echo=TRUE}
+grouped_interval <- df %>% filter(complete.cases(steps)) %>% group_by(interval) %>% summarise(steps=sum(steps))
 
+head(grouped_interval)
 
+ggplot(data=grouped_interval, aes(x=interval, y=steps, group=1)) + geom_line()
+
+interval_with_max_steps <- grouped_interval %>% arrange(desc(steps)) %>% top_n(1)
+
+interval_with_max_steps
+
+```
 
 ## Imputing missing values
+```{r echo=TRUE}
+#the number of missing values
+dim(df %>% filter(is.na(steps)))[1]
 
+# calculate the average steps per day while replacing the ones whith missing values
+avg_steps_per_day <- (df %>% mutate(steps = ifelse(is.na(steps), 0, steps)) 
+                      %>% group_by(date) 
+                      %>% summarise( steps=round(mean(steps)) )
+)
+
+df_filled_steps <- df
+
+
+for(i in 1:nrow(df_filled_steps)) {
+  date <- df_filled_steps[i, "date"]
+  steps <- df_filled_steps[i, "steps"]
+  if(is.na(steps)){
+    df_filled_steps[i, "steps"]<-avg_steps_per_day[avg_steps_per_day$date == date, "steps"]
+  }
+}
+
+steps_per_day_filled_na = df_filled_steps %>% group_by(date) %>% summarise(steps=sum(steps))
+
+qplot(data=steps_per_day_filled_na, steps, xlab="Steps per day", binwidth = bwidth) + labs(title="Histogram of steps/day with filled NA values");
+
+mean_filled_na = steps_per_day_filled_na %>% summarise(mean(steps));
+median_filled_na = steps_per_day_filled_na %>% summarise(median(steps))
+
+mean_filled_na
+median_filled_na
+
+```
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r echo=TRUE}
+week_days=c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+
+df_filled_steps <- (
+        df_filled_steps %>% 
+          mutate(day=as.factor(
+              ifelse(weekdays(date) %in% week_days, "weekday", "weekend")
+            )
+          )
+)
+
+grouped_interval_filled_steps <- df_filled_steps %>% group_by(interval, day)
+weekdays <- grouped_interval_filled_steps  %>% filter(day=="weekday") %>% summarise(steps=mean(steps))
+weekends <- grouped_interval_filled_steps  %>% filter(day=="weekend") %>% summarise(steps=mean(steps))
+grouped_interval_filled_steps <- bind_rows(weekdays, weekends)
+
+head(grouped_interval_filled_steps)
+
+ggplot(data=grouped_interval_filled_steps, aes(x=interval, y=steps)) + geom_line() +facet_wrap(~day, nrow=2)
+```
+

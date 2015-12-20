@@ -43,7 +43,7 @@ bwidth <- breaks[2]-breaks[1]
 qplot(data=steps_per_day, steps, xlab="Steps per day", binwidth = bwidth)
 ```
 
-![](PA1_files/figure-html/unnamed-chunk-2-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
 
 ```r
 mean = steps_per_day %>% summarise(mean(steps))
@@ -97,7 +97,7 @@ head(grouped_interval)
 ggplot(data=grouped_interval, aes(x=interval, y=steps, group=1)) + geom_line()
 ```
 
-![](PA1_files/figure-html/unnamed-chunk-3-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
 
 ```r
 interval_with_max_steps <- grouped_interval %>% arrange(desc(steps)) %>% top_n(1)
@@ -153,7 +153,7 @@ steps_per_day_filled_na = df_filled_steps %>% group_by(date) %>% summarise(steps
 qplot(data=steps_per_day_filled_na, steps, xlab="Steps per day", binwidth = bwidth) + labs(title="Histogram of steps/day with filled NA values");
 ```
 
-![](PA1_files/figure-html/unnamed-chunk-4-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
 
 ```r
 mean_filled_na = steps_per_day_filled_na %>% summarise(mean(steps));
@@ -222,5 +222,5 @@ head(grouped_interval_filled_steps)
 ggplot(data=grouped_interval_filled_steps, aes(x=interval, y=steps)) + geom_line() +facet_wrap(~day, nrow=2)
 ```
 
-![](PA1_files/figure-html/unnamed-chunk-5-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
 

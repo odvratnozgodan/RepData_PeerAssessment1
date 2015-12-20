@@ -11,4 +11,4 @@ if(file.exists("activity.zip")){
 }
 
 df = mutate(df, date = as.Date(date, format = '%Y-%m-%d'));
-head(df);
+head(df)
